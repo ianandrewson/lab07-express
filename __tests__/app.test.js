@@ -93,4 +93,34 @@ describe('app routes', () => {
         });
       });
   });
+
+  it('gets a single recipe by id', async() => {
+    const recipe = await Recipe.create({
+      name: 'cookies',
+      directions: [
+        'preheat oven to 375',
+        'mix ingredients',
+        'put dough on cookie sheet',
+        'bake for 10 minutes'
+      ],
+    });
+    return request(app)
+      .get(`/api/v1/recipes/${recipe._id}`)
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: recipe._id.toString(),
+          name: 'cookies',
+          directions: [
+            'preheat oven to 375',
+            'mix ingredients',
+            'put dough on cookie sheet',
+            'bake for 10 minutes'
+          ],
+          __v: 0
+        });
+      });
+  });
+  it('deletes a single recipe by id', () => {
+
+  });
 });

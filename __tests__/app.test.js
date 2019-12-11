@@ -15,6 +15,23 @@ describe('app routes', () => {
     return mongoose.connection.dropDatabase();
   });
 
+  let recipe;
+  beforeEach(async() => {
+    recipe = await Recipe.create({
+      name: 'cookies',
+      directions: [
+        'preheat oven to 375',
+        'mix ingredients',
+        'put dough on cookie sheet',
+        'bake for 10 minutes'
+      ],
+      ingredients: [
+        { name: 'sugar', amount: 'hella', measurement: 'pounds' },
+        { name: 'chocolate', amount: 'all of it', measurement: 'metric tons' }
+      ]
+    });
+  });
+
   afterAll(() => {
     return mongoose.connection.close();
   });
@@ -29,6 +46,10 @@ describe('app routes', () => {
           'mix ingredients',
           'put dough on cookie sheet',
           'bake for 10 minutes'
+        ],
+        ingredients: [
+          { name: 'sugar', amount: 'hella', measurement: 'pounds' },
+          { name: 'chocolate', amount: 'all of it', measurement: 'metric tons' }
         ]
       })
       .then(res => {
@@ -41,6 +62,10 @@ describe('app routes', () => {
             'put dough on cookie sheet',
             'bake for 10 minutes'
           ],
+          ingredients: [
+            { _id: expect.any(String), name: 'sugar', amount: 'hella', measurement: 'pounds' },
+            { _id: expect.any(String), name: 'chocolate', amount: 'all of it', measurement: 'metric tons' }
+          ],
           __v: 0
         });
       });
@@ -48,9 +73,9 @@ describe('app routes', () => {
 
   it('gets all recipes', async() => {
     const recipes = await Recipe.create([
-      { name: 'cookies', directions: [] },
-      { name: 'cake', directions: [] },
-      { name: 'pie', directions: [] }
+      { name: 'cookies', directions: [], ingredients: [] },
+      { name: 'cake', directions: [], ingredients: [] },
+      { name: 'pie', directions: [], ingredients: [] }
     ]);
 
     return request(app)
@@ -66,16 +91,6 @@ describe('app routes', () => {
   });
 
   it('updates a recipe by id', async() => {
-    const recipe = await Recipe.create({
-      name: 'cookies',
-      directions: [
-        'preheat oven to 375',
-        'mix ingredients',
-        'put dough on cookie sheet',
-        'bake for 10 minutes'
-      ],
-    });
-
     return request(app)
       .patch(`/api/v1/recipes/${recipe._id}`)
       .send({ name: 'good cookies' })
@@ -88,6 +103,53 @@ describe('app routes', () => {
             'mix ingredients',
             'put dough on cookie sheet',
             'bake for 10 minutes'
+          ],
+          ingredients: [
+            { _id: expect.any(String), name: 'sugar', amount: 'hella', measurement: 'pounds' },
+            { _id: expect.any(String), name: 'chocolate', amount: 'all of it', measurement: 'metric tons' }
+          ],
+          __v: 0
+        });
+      });
+  });
+
+  it('gets a single recipe by id', async() => {
+    return request(app)
+      .get(`/api/v1/recipes/${recipe._id}`)
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: recipe._id.toString(),
+          name: 'cookies',
+          directions: [
+            'preheat oven to 375',
+            'mix ingredients',
+            'put dough on cookie sheet',
+            'bake for 10 minutes'
+          ],
+          ingredients: [
+            { _id: expect.any(String), name: 'sugar', amount: 'hella', measurement: 'pounds' },
+            { _id: expect.any(String), name: 'chocolate', amount: 'all of it', measurement: 'metric tons' }
+          ],
+          __v: 0
+        });
+      });
+  });
+  it('deletes a single recipe by id', async() => {
+    return request(app)
+      .delete(`/api/v1/recipes/${recipe.id}`)
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: recipe._id.toString(),
+          name: 'cookies',
+          directions: [
+            'preheat oven to 375',
+            'mix ingredients',
+            'put dough on cookie sheet',
+            'bake for 10 minutes'
+          ],
+          ingredients: [
+            { _id: expect.any(String), name: 'sugar', amount: 'hella', measurement: 'pounds' },
+            { _id: expect.any(String), name: 'chocolate', amount: 'all of it', measurement: 'metric tons' }
           ],
           __v: 0
         });
